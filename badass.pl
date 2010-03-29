@@ -1,11 +1,11 @@
 #!/usr/bin/perl
 
+use lib 'lib';
+use Badass::Game;
+use Badass::Viewport;
+use Badass::Beard;
 
-use Game;
-use Viewport;
-use Beard;
-
-
-
+my $game = Badass::Game->new();
+$game->run();
 
 

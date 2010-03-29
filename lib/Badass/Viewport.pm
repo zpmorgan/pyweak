@@ -1,9 +1,10 @@
 package Badass::Viewport;
 use Mouse;
 
+#maybe this is shtoopid
 has window => (
    is => 'rw',
-   isa => 'SDL::Game',
+   isa => 'SDL::Surface',
 );
 
 for (qw/x y w h/){   #/// 
@@ -17,5 +18,7 @@ sub draw_entity{}
 
 
 
+no Mouse;
+__PACKAGE__->meta->make_immutable();
 1
 
