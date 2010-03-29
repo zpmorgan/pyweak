@@ -9,7 +9,7 @@ has window => (
 for (qw/x y w h/){   #/// 
    has $_ => (
       is => 'rw',
-      isa => 'Num',
+      isa => 'Int',
    );
 }
 sub draw_bg{}
