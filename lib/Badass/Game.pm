@@ -1,12 +1,12 @@
 package Badass::Game;
 use Mouse;
-
 use SDL;
 use SDL::Rect;
 use SDL::Surface;
 use SDL::Video;
 use SDL::Event;
 use SDL::Color;
+use SDLx::Timer;
 
 #use SDL::GFX::Primitives;
 #
@@ -24,6 +24,11 @@ has badass => (
    is => 'rw',
    isa => 'Badass::Entity');
 
+has timer => (
+   is => 'ro',
+   isa => 'SDLx::Timer',
+   default => sub{ SDLx::Timer->new() },
+   lazy => 1 );
 
 sub run{
    my $self = shift;
