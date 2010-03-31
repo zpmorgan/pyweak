@@ -6,7 +6,7 @@ use SDL;
 
 =head1 NAME
 
-SDLx::Timer - A timer for your SDL game, with pausing
+SDLx::Timer - A timer for your SDL game, with pause control
 
 =head1 SYNOPSIS
 
@@ -25,7 +25,7 @@ This is based on lesson 13 and 14 from L<< http://lazyfoo.net/SDL_tutorials/inde
 
 =head1 TODO
 
-Changes in speed!
+Changes in speed! Time travel! Alternate dimensions! Multiple time-like dimensions!
 
 =cut
 
