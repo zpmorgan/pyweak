@@ -1,12 +1,15 @@
+#!/usr/bin/perl
 use strict;
 use warnings;
+
+use lib 'lib';
 
 use SDL;
 use SDL::App;
 use SDL::Events;
 #use SDL::Surface;
 use SDL::Video;
-use SDLx::Timer;
+use SDLx::Clock;
 use SDLx::Animation;
 use Carp;
 
@@ -28,11 +31,12 @@ my $app = SDL::Video::set_video_mode( 800, 500, 32, SDL_SWSURFACE );
 croak 'Cannot init video mode 800x500x32: ' . SDL::get_error() if !($app);
 
 
-my $timer = SDLx::Timer->new();
-$timer->start;
+my $clock = SDLx::Clock->new();
+$clock->start;
 
-my $anim = SDLx::Animation->new(timer=>$timer, x=>100, y=>100);
+my $anim = SDLx::Animation->new(clock=>$clock, x=>100, y=>100, parent_surface=>$app);
 $anim->add_cycle ( name=>'moonwalk', file=>'data/moonwalk.gif' );
+$anim->set_cycle ('moonwalk');
 
 # Get an event object to snapshot the SDL event queue
 my $event = SDL::Event->new();

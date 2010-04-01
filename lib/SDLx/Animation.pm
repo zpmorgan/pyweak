@@ -14,12 +14,12 @@ has parent_surface => (
 
 #these are in pixels; h,w are immutable; x and y are of course mutable
 #perhaps h and w should be overridable in each cycle or frame?
-for (qw/h w/){
-   has $_ => (
+for my $dimnsn(qw/h w/){
+   has $dimnsn => (
       is => 'ro',
       isa => 'Int',
       lazy => 1,
-      default => sub {$_[0]->_default_dimension($_)}
+      default => sub {$_[0]->_default_dimension($dimnsn)}
    );
 }
 for (qw/x y/){
@@ -40,9 +40,9 @@ has default_cycle => (
 );
 has _current_cycle => (
    is => 'rw',
-   isa => 'Hashref',
+   isa => 'HashRef',
    lazy => 1,
-   default => sub { $_->cycles->{$_[0]->default_cycle} },
+   default => sub { $_[0]->cycles->{$_[0]->default_cycle} },
 );
 
 sub current_cycle_name {
@@ -57,7 +57,7 @@ SDLx::Animation - Defining animated entity behavior
 =head1 SYNOPSIS
 
    my $anim = SDLx::Animation->new (
-      timer => $timer,
+      clock => $clock,
       default_cycle => 'breathe',
       parent_surface => $app,
    );
@@ -106,7 +106,7 @@ SDLx::Animation - Defining animated entity behavior
 =head2 draw
 
 Draws current frame on C<< $self->parent_surface >>,
-based on the current cycle and C<< $self->timer >>.
+based on the current cycle and C<< $self->clock >>.
 
 =head2 set_cycle
 
@@ -119,21 +119,23 @@ based on the current cycle and C<< $self->timer >>.
 =cut
 
 #this is anything with a 'get_ticks' method.
-has 'timer' => (
+has 'clock' => (
    is => 'rw',
 );
 
-#effectively, the timer value from when animation starts
+#effectively, the clock value from when animation starts
 has _start_time => (
    is => 'rw',
    isa => 'Int',
+   default => sub{$_[0]->clock->get_ticks},
+   lazy=>1,
 );
 sub _current_frame_num{
    my $self = shift;
    my $cycle = $self->_current_cycle;
-   my $ticks = $self->timer->get_ticks - $self->_start_time;
+   my $ticks = $self->clock->get_ticks - $self->_start_time;
    $ticks %= $cycle->{interval};
-   return $cycle->{range}->{$ticks};
+   return $cycle->{span}->lookup($ticks);
 }
 sub _current_frame{
    my $self = shift;
@@ -155,7 +157,8 @@ u and v both default to 0, and file defaults to the cycle's file, if it exists.
 
 =cut
 
-use Tie::RangeHash;
+use Array::IntSpan;
+
 
 sub add_cycle {
    my ($self, %cycle) = @_;
@@ -171,9 +174,8 @@ sub add_cycle {
    
    #syntax: $rhash{'1.4,1.8'}      = 'Jim';
    #    $rhash{1.5} eq 'Jim'
-   my %range;
-   tie %range, 'Tie::RangeHash';
-   $cycle{range} = \%range;
+   my $span = Array::IntSpan->new();
+   $cycle{span} = $span;
    
    #number the frames, and determine offsets.
    my $i=0;
@@ -181,8 +183,9 @@ sub add_cycle {
    for my $frame (@{$cycle{frames}}){
       $frame->{n} = $i;
       $frame->{offset} = $offset;
-      warn "$offset,".($offset+$frame->{ms}-1);
-      $range{"$offset,".($offset+$frame->{ms}-1)} = $i;
+      #warn "$offset,".($offset+$frame->{ms}-1);
+      #$range{"$offset,".($offset+$frame->{ms}-1)} = $i;
+      $span->set_range($offset, $offset+$frame->{ms}-1, $i);
       $offset += $frame->{ms};
       $i++;
    }
@@ -240,7 +243,7 @@ sub _default_dimension{
 
 sub set_cycle {
    my ($self, $cycle_name) = @_;
-   $self->current_cycle($cycle_name);
+   $self->_current_cycle($self->cycles->{$cycle_name});
 }
 
 sub draw{
@@ -253,11 +256,11 @@ sub draw{
 
 sub src_rect{
    my $self = shift;
-   return SDL::Rect::new(0,0,$self->w,$self->h)
+   return SDL::Rect->new(0,0,$self->w,$self->h)
 }
 sub dest_rect{
    my $self = shift;
-   return SDL::Rect::new($self->x,$self->y, $self->w,$self->h);
+   return SDL::Rect->new($self->x,$self->y, $self->w,$self->h);
 }
 
 no Mouse;
