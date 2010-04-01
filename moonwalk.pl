@@ -26,7 +26,7 @@ croak 'Cannot init video ' . SDL::get_error()
 
 #Make our display window
 #This is our actual SDL application window
-my $app = SDL::Video::set_video_mode( 800, 500, 32, SDL_SWSURFACE );
+my $app = SDL::Video::set_video_mode( 300, 300, 32, SDL_SWSURFACE );
 
 croak 'Cannot init video mode 800x500x32: ' . SDL::get_error() if !($app);
 
