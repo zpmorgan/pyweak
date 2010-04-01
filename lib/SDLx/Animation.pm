@@ -3,6 +3,7 @@ use Mouse;
 
 use SDL;
 use SDL::Surface;
+use SDL::Image;
 use SDL::Rect;
 use SDL::Video;
 
@@ -136,7 +137,7 @@ sub _current_frame_num{
 }
 sub _current_frame{
    my $self = shift;
-   my $i = $self->current_frame_num;
+   my $i = $self->_current_frame_num;
    return $self->_current_cycle->{frames}[$i];
 }
 
@@ -180,7 +181,8 @@ sub add_cycle {
    for my $frame (@{$cycle{frames}}){
       $frame->{n} = $i;
       $frame->{offset} = $offset;
-      $range{"$offset,".$offset+$frame->{ms}} = $i;
+      warn "$offset,".($offset+$frame->{ms}-1);
+      $range{"$offset,".($offset+$frame->{ms}-1)} = $i;
       $offset += $frame->{ms};
       $i++;
    }
@@ -204,7 +206,7 @@ sub _load_gif{
    my @frames;
    for my $i (0..$#imgs){
       my $frame_filename = $filename;
-      $frame_filename =~ s# \.gif$ # $i\.gif #ix;
+      $frame_filename =~ s# \.gif$ #$i\.gif#ix;
       $frame_filename = '/tmp/'.$frame_filename;
       # "/tmp/data--pics-MichaelJacksonMoonwalk2.gif", like such as..
       #small potential for filename collisions, except with previous runs.
@@ -214,15 +216,16 @@ sub _load_gif{
       }
       
       my $img = $imgs[$i];
-      $img->write($frame_filename)
+      #warn $frame_filename;
+      $img->write(file=>$frame_filename)
          or die "Cannot write: ",$img->errstr;
 
       push @frames, {
          u=>0,
          v=>0,
-         ms => $img->gif_delay*10,
+         ms => $img->tags(name=>'gif_delay')*10,
          file => $frame_filename,
-         surf => SDL::Image::Load($frame_filename),
+         surf => SDL::Image::load($frame_filename),
       }
    }
    $cycle->{frames} = \@frames;

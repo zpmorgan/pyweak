@@ -11,6 +11,9 @@ use SDLx::Animation;
 use Carp;
 
 
+# If Imager gives you this error:
+#   Undefined subroutine &Imager::i_readgif_multi_wiol called at /usr/local/lib/perl/5.10.0/Imager.pm line 1990.
+# then you need to install libgif-dev and rebuild Imager.
 
 
 #Initing video
