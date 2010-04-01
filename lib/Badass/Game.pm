@@ -1,5 +1,6 @@
 package Badass::Game;
 use Mouse;
+use Carp;
 use SDL;
 use SDL::Rect;
 use SDL::Surface;
@@ -33,11 +34,19 @@ has timer => (
 sub run{
    my $self = shift;
    $self->app( SDL::Video::set_video_mode( 800, 500, 32, SDL_SWSURFACE ) );
-   
+   croak 'Cannot init video mode 800x500x32: ' . SDL::get_error() if !($self->app);
+   while(1){
+      $self->draw;
+   }
 }
 
 sub draw{
-   
+   my $self = shift;
+   SDL::Video::fill_rect(
+      $self->app,
+      SDL::Rect->new( 0, 0, 800, 500 ),
+      SDL::Video::map_RGB( $self->app->format, 0,0,0 )
+   SDL::Video::flip($self->app);
 }
 
 
