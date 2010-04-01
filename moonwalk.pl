@@ -34,7 +34,7 @@ croak 'Cannot init video mode 800x500x32: ' . SDL::get_error() if !($app);
 my $clock = SDLx::Clock->new();
 $clock->start;
 
-my $anim = SDLx::Animation->new(clock=>$clock, x=>100, y=>100, parent_surface=>$app);
+my $anim = SDLx::Animation->new(clock=>$clock, w=>100,h=>100,x=>100, y=>100, parent_surface=>$app);
 $anim->add_cycle ( name=>'moonwalk', file=>'data/moonwalk.gif' );
 $anim->set_cycle ('moonwalk');
 
@@ -53,7 +53,7 @@ while (1){
    SDL::Video::fill_rect(
       $app,
       SDL::Rect->new( 0, 0, $app->w, $app->h ),
-      SDL::Video::map_RGB( $app->format, 0,0,0 )
+      SDL::Video::map_RGB( $app->format, 0,55,0 )
    );
    $anim->draw;
    SDL::Video::flip($app);
