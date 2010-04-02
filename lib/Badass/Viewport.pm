@@ -31,8 +31,33 @@ for (qw/w h/){   #/// on world coordinates
       default=>300,
    );
 }
+#thing to track, with x and y methods
+has ent => (
+   is => 'rw',
+   isa => 'Badass::Entity',
+);
+
+sub track_entity{
+   my $self = shift;
+   die 'viewport needs entity to track.' unless $self->ent;
+   if ($self->x+100 > $self->ent->x){
+      $self->x( $self->ent->x - 100);
+   }
+   elsif ($self->x+ 32 - $self->ent->x > $self->w-100){
+      $self->x( $self->ent->x + 32 + 100 - $self->w);
+   }
+   
+   if ($self->y+100 > $self->ent->y){
+      $self->y( $self->ent->y - 100);
+   }
+   elsif ($self->y+ 32 - $self->ent->y > $self->h-100){
+      $self->y( $self->ent->y + 32 + 100 - $self->h);
+   }
+}
+
 sub draw{
    my $self = shift;
+   $self->track_entity;
    my $map = $self->map;
    my $window = $self->parent_surface;
    my $x = $self->x;

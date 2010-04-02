@@ -49,15 +49,17 @@ sub run{
    croak 'Cannot init video mode 800x500x32: ' . SDL::get_error() if !($self->app);
    $self->clock->start();
    
+   $self->load_entities;
+   
    #initialize map & viewport
    $self->map( Badass::Map->new());
    $self->viewport ( Badass::Viewport->new (
       map=>$self->map, 
       parent_surface=>$self->app,
       x=>0, y=>0,
+      ent => $self->badass,
    ));
    
-   $self->load_entities;
    
    $anim = SDLx::Animation->new(clock=>$self->clock, w=>100,h=>100,x=>100, y=>100, parent_surface=>$self->app);
    $anim->add_cycle ( name=>'moonwalk', file=>'data/moonwalk.gif', default=>1 );
