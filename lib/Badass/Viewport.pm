@@ -52,11 +52,10 @@ sub track_entity{
    my $ent_y_pixels = int($self->ent->y * $tilesize);
    my $x_pixels = int($self->x * $tilesize);
    my $y_pixels = int($self->y * $tilesize);
-   warn $self->x;
-   if ($ent_x_pixels - 100 < $x_pixels){
-      $self->x( ($ent_x_pixels - 100) / $tilesize);
+   if ($ent_x_pixels - 1 < $x_pixels){
+      $self->x( ($ent_x_pixels - 1) / $tilesize);
    }
-   elsif ($ent_x_pixels + 32 > $x_pixels + $self->w - 100){warn;
+   elsif ($ent_x_pixels + 32 > $x_pixels + $self->w - 100){
       $self->x( ( $ent_x_pixels + 32 + 100 - $self->w) / $tilesize);
    }
    if ($ent_y_pixels - 100 < $y_pixels){
@@ -74,10 +73,10 @@ sub draw{
    my $window = $self->parent_surface;
    my $x = $self->x;
    my $y = $self->y;
-   my $tile_x_min = floor ($x / $tilesize);
-   my $tile_x_max = ceil (($x + $self->w) / $tilesize);
-   my $tile_y_min = floor ($y / $tilesize);
-   my $tile_y_max = ceil (($y + $self->h) / $tilesize);
+   my $tile_x_min = floor ($x);
+   my $tile_x_max = ceil (($x + $self->w/$tilesize));
+   my $tile_y_min = floor ($y);
+   my $tile_y_max = ceil (($y + $self->h/$tilesize));
    for my $tile_x($tile_x_min .. $tile_x_max){
       for my $tile_y($tile_y_min .. $tile_y_max){
          my $tile = $map->tile_at($tile_x, $tile_y);
@@ -91,7 +90,13 @@ sub draw{
       }
    }
 }
-sub draw_entity{}
+sub draw_entity{
+   my ($self, $entity) = @_;
+   my $anim = $entity->anim;
+   $anim->x(int(($entity->x-$self->x)*$tilesize));
+   $anim->y(int(($entity->y-$self->y)*$tilesize));
+   $anim->draw();
+}
 
 
 

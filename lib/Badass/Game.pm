@@ -42,12 +42,12 @@ has clock => (
 my $anim;
 my $portrait = SDL::Image::load ('data/vegastrike_male.png');
 my $portrait_src_rect = SDL::Rect->new(0,0,250,300);
-my $portrait_dest_rect = SDL::Rect->new(450,20,250,300);
+my $portrait_dest_rect = SDL::Rect->new(650,20,250,300);
 
 
 sub run{
    my $self = shift;
-   $self->app( SDL::Video::set_video_mode( 700, 400, 32, SDL_SWSURFACE ) );
+   $self->app( SDL::Video::set_video_mode( 850, 500, 32, SDL_SWSURFACE ) );
    croak 'Cannot init video mode 800x500x32: ' . SDL::get_error() if !($self->app);
    $self->clock->start();
    
@@ -59,6 +59,8 @@ sub run{
       map=>$self->map, 
       parent_surface=>$self->app,
       x=>0, y=>0,
+      w => $self->app->w - 250,
+      h => $self->app->h,
       ent => $self->badass,
    ));
    
@@ -108,7 +110,7 @@ sub draw{
    );
    $self->viewport->draw;
    $anim->draw;
-   $self->badass->draw();
+   $self->viewport->draw_entity($self->badass);
    #draw face
    SDL::Video::blit_surface (
       $portrait, $portrait_src_rect,

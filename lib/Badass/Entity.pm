@@ -29,7 +29,7 @@ sub update_pos {
 my $tilesize = 32;
 
 #update anim coordinates and call anim->draw
-sub draw{
+sub drawFOO{
    my $self = shift;
    my $anim = $self->anim;
    $anim->x(int($self->x*$tilesize));
