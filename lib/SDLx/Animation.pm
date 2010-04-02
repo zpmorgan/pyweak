@@ -191,7 +191,6 @@ sub add_cycle {
    }
    $cycle{interval} = $offset;
 }
-use Imager qw(:all);
 
 # use Imager library to read gifs
 sub _load_gif{
@@ -211,8 +210,9 @@ sub _load_gif{
       my $frame_filename = $filename;
       $frame_filename =~ s# \.gif$ #$i\.gif#ix;
       $frame_filename = '/tmp/'.$frame_filename;
-      # "/tmp/data--pics-MichaelJacksonMoonwalk2.gif", like such as..
+      # "/tmp/data-pics-MichaelJacksonMoonwalk2.gif", like such as..
       #small potential for filename collisions, except with previous runs.
+      #maybe there's a way to hold images in memory and have SDL use those.
       
       if (-e $frame_filename){
          unlink $frame_filename;
