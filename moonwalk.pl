@@ -41,7 +41,6 @@ $anim->set_cycle ('moonwalk');
 # Get an event object to snapshot the SDL event queue
 my $event = SDL::Event->new();
 while (1){
-   
    while ( SDL::Events::poll_event($event) )
    {    #Get all events from the event queue in our event
       if ($event->type == SDL_QUIT)

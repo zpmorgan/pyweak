@@ -1,4 +1,4 @@
-package Badass::Viewport;
+package Badass::Entity;
 use Mouse;
 
 
@@ -9,14 +9,20 @@ for (qw/x y/){   #///
    );
 }
 
-#this will surely become more elaborate
-has img => (
-   is => 'rw',
-   isa => 'SDL::Surface');
 
 has anim => (
    is => 'rw',
    isa => 'SDLx::Animation');
+
+#update anim coordinates and call anim->draw
+sub draw{
+   my $self = shift;
+   my $anim = $self->anim;
+   $anim->x($self->x);
+   $anim->y($self->y);
+   $anim->draw();
+}
+
 
 
 no Mouse;

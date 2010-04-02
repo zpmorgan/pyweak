@@ -12,6 +12,12 @@ has parent_surface => (
    isa => 'SDL::Surface',
 );
 
+#this is anything with a 'get_ticks' method.
+has clock => (
+   is => 'rw',
+   required => 1,
+);
+
 #these are in pixels; h,w are immutable; x and y are of course mutable
 #perhaps h and w should be overridable in each cycle or frame?
 for my $dimnsn(qw/h w/){
@@ -42,7 +48,7 @@ has _current_cycle => (
    is => 'rw',
    isa => 'HashRef',
    lazy => 1,
-   default => sub { $_[0]->cycles->{$_[0]->default_cycle} },
+   default => sub { die 'needs default cycle' unless $_[0]->default_cycle ; $_[0]->cycles->{$_[0]->default_cycle} },
 );
 
 sub current_cycle_name {
@@ -103,25 +109,12 @@ SDLx::Animation - Defining animated entity behavior
 
 =head1 METHODS
 
-=head2 draw
-
-Draws current frame on C<< $self->parent_surface >>,
-based on the current cycle and C<< $self->clock >>.
-
-=head2 set_cycle
-
- $anim->set_cycle('drink_coffee');
-
 =head2 translate_cycle
 
 =head2 adjust_time
 
 =cut
 
-#this is anything with a 'get_ticks' method.
-has 'clock' => (
-   is => 'rw',
-);
 
 #effectively, the clock value from when animation starts
 has _start_time => (
@@ -164,9 +157,13 @@ sub add_cycle {
    my ($self, %cycle) = @_;
    $self->cycles->{$cycle{name}} = \%cycle;
    
+   if ($cycle{default}){
+      $self->default_cycle ($cycle{name});
+   }
+   
    #load file(s)
    if ($cycle{frames}){
-      die;
+      $self->_load_frames(\%cycle);
    }
    else { #gif?
       $self->_load_gif(\%cycle);
@@ -181,6 +178,7 @@ sub add_cycle {
    my $i=0;
    my $offset = 0;
    for my $frame (@{$cycle{frames}}){
+      $frame->{ms} = 1000 unless defined $frame->{ms};
       $frame->{n} = $i;
       $frame->{offset} = $offset;
       #warn "$offset,".($offset+$frame->{ms}-1);
@@ -190,6 +188,20 @@ sub add_cycle {
       $i++;
    }
    $cycle{interval} = $offset;
+}
+
+#do some dwim, and load images into sdl::surfaces
+sub _load_frames{
+   my ($self, $cycle) = @_;
+   for my $frame (@{$cycle->{frames}}){
+      $frame->{u} //= 0;
+      $frame->{v} // 0;
+      $frame->{ms} //= 100; #sensible default?
+      my $filename = $frame->{file} // $cycle->{file};
+      $frame->{surf} = SDL::Image::load ($filename);
+      #todo: have frames from the same file use the same surface
+      warn "file $filename not loaded for some reason" unless $frame->{surf};
+   }
 }
 
 # use Imager library to read gifs
@@ -241,10 +253,23 @@ sub _default_dimension{
    return $cycle->{frames}[0]{surf}->$WorH;
 }
 
+=head2 set_cycle
+
+ $anim->set_cycle('drink_coffee');
+
+=cut
+
 sub set_cycle {
    my ($self, $cycle_name) = @_;
    $self->_current_cycle($self->cycles->{$cycle_name});
 }
+
+=head2 draw
+
+Draws current frame on C<< $self->parent_surface >>,
+based on the current cycle and C<< $self->clock >>.
+
+=cut
 
 sub draw{
    my $self = shift;

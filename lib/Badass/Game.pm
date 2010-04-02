@@ -19,6 +19,10 @@ has viewport => (
    is => 'rw',
    isa => 'Badass::Viewport');
 
+has map => (
+   is => 'rw',
+   isa => 'Badass::Map');
+
 has app =>  (
    is => 'rw',
    isa => 'SDL::Surface');
@@ -35,17 +39,29 @@ has clock => (
 
 my $anim;
 my $portrait = SDL::Image::load ('data/vegastrike_male.png');
-my $portrait_rect = SDL::Rect->new(350,20,250,300);
+my $portrait_src_rect = SDL::Rect->new(0,0,250,300);
+my $portrait_dest_rect = SDL::Rect->new(450,20,250,300);
+
 
 sub run{
    my $self = shift;
-   $self->app( SDL::Video::set_video_mode( 600, 400, 32, SDL_SWSURFACE ) );
+   $self->app( SDL::Video::set_video_mode( 700, 400, 32, SDL_SWSURFACE ) );
    croak 'Cannot init video mode 800x500x32: ' . SDL::get_error() if !($self->app);
    $self->clock->start();
-
+   
+   #initialize map & viewport
+   $self->map( Badass::Map->new());
+   $self->viewport ( Badass::Viewport->new (
+      map=>$self->map, 
+      parent_surface=>$self->app,
+      x=>0, y=>0,
+   ));
+   
+   $self->load_entities;
+   
    $anim = SDLx::Animation->new(clock=>$self->clock, w=>100,h=>100,x=>100, y=>100, parent_surface=>$self->app);
-   $anim->add_cycle ( name=>'moonwalk', file=>'data/moonwalk.gif' );
-   $anim->set_cycle ('moonwalk');
+   $anim->add_cycle ( name=>'moonwalk', file=>'data/moonwalk.gif', default=>1 );
+#   $anim->set_cycle ('moonwalk');
    
    while(1){
       # Get an event object to snapshot the SDL event queue
@@ -69,11 +85,40 @@ sub draw{
       SDL::Rect->new( 0, 0, $self->app->w, $self->app->h ),
       SDL::Video::map_RGB( $self->app->format, 0,55,0 )
    );
+   $self->viewport->draw;
    $anim->draw;
-   $
+   $self->badass->draw();
+   #draw face
+   SDL::Video::blit_surface (
+      $portrait, $portrait_src_rect,
+      $self->app,$portrait_dest_rect);
+      
    SDL::Video::flip($self->app);
 }
 
+sub load_entities{
+   my $self = shift;
+   
+   #load badass animation and entity
+   my $badass_anim = SDLx::Animation->new(
+      parent_surface=>$self->app,
+      clock => $self->clock,
+      w=>32,h=>32, #x=>0, y=>0,
+      default_cycle => 'stand',
+   );
+   $badass_anim->add_cycle(
+      name=>'stand', 
+      default=>1, 
+      frames => [ {
+         file=>'data/badass1.png',
+      } ],
+   );
+   $self->badass (Badass::Entity->new(
+      anim => $badass_anim,
+      x=>200,
+      y=>200,
+   ));
+}
 
 no Mouse;
 __PACKAGE__->meta->make_immutable();
