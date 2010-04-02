@@ -17,18 +17,25 @@ my $tilesize = 32;
 #u,v are offsets on parent_window, in pixels.
 #h and w in pixels, tilesize in pixels,
 #x and y are in tiles, the map offset.
-for (qw/u v x y/){   #/// on world coordinates 
+for (qw/u v/){   #/// pixels on app
    has $_ => (
       is => 'rw',
       isa => 'Int',
       default=>0,
    );
 }
-for (qw/w h/){   #/// on world coordinates 
+for (qw/w h/){   #/// pixels on app
    has $_ => (
       is => 'rw',
       isa => 'Int',
       default=>300,
+   );
+}
+for (qw/x y/){   #/// tiles on world coordinates 
+   has $_ => (
+      is => 'rw',
+      isa => 'Num',
+      default=>0,
    );
 }
 #thing to track, with x and y methods
@@ -40,18 +47,23 @@ has ent => (
 sub track_entity{
    my $self = shift;
    die 'viewport needs entity to track.' unless $self->ent;
-   if ($self->x+100 > $self->ent->x){
-      $self->x( $self->ent->x - 100);
-   }
-   elsif ($self->x+ 32 - $self->ent->x > $self->w-100){
-      $self->x( $self->ent->x + 32 + 100 - $self->w);
-   }
    
-   if ($self->y+100 > $self->ent->y){
-      $self->y( $self->ent->y - 100);
+   my $ent_x_pixels = int($self->ent->x * $tilesize);
+   my $ent_y_pixels = int($self->ent->y * $tilesize);
+   my $x_pixels = int($self->x * $tilesize);
+   my $y_pixels = int($self->y * $tilesize);
+   warn $self->x;
+   if ($ent_x_pixels - 100 < $x_pixels){
+      $self->x( ($ent_x_pixels - 100) / $tilesize);
    }
-   elsif ($self->y+ 32 - $self->ent->y > $self->h-100){
-      $self->y( $self->ent->y + 32 + 100 - $self->h);
+   elsif ($ent_x_pixels + 32 > $x_pixels + $self->w - 100){warn;
+      $self->x( ( $ent_x_pixels + 32 + 100 - $self->w) / $tilesize);
+   }
+   if ($ent_y_pixels - 100 < $y_pixels){
+      $self->y( ( $ent_y_pixels - 100) / $tilesize);
+   }
+   elsif ($ent_y_pixels + 32 > $y_pixels + $self->h - 100){
+      $self->y( ( $ent_y_pixels + 32 + 100 - $self->h) / $tilesize);
    }
 }
 

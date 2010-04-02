@@ -31,6 +31,8 @@ has badass => (
    is => 'rw',
    isa => 'Badass::Entity');
 
+my $mov_spd = .004;
+
 has clock => (
    is => 'ro',
    isa => 'SDLx::Clock',
@@ -65,18 +67,35 @@ sub run{
    $anim->add_cycle ( name=>'moonwalk', file=>'data/moonwalk.gif', default=>1 );
 #   $anim->set_cycle ('moonwalk');
    
+   my $prev_clock = $self->clock->get_ticks;
    while(1){
+      my $ms_delta = $self->clock->get_ticks - $prev_clock;
       # Get an event object to snapshot the SDL event queue
       my $event = SDL::Event->new();
 
       while ( SDL::Events::poll_event($event) ) {
          #Get all events from the event queue in our event
-         if ($event->type == SDL_QUIT)
-         {
+         if ($event->type == SDL_QUIT) {
             exit
          }
+         elsif ( $event->type == SDL_KEYDOWN ) {
+            my $key = $event->key_sym;
+            $self->badass->xv($self->badass->xv-$mov_spd) if($key == SDLK_LEFT);
+            $self->badass->xv($self->badass->xv+$mov_spd) if($key == SDLK_RIGHT);
+            $self->badass->yv($self->badass->yv-$mov_spd) if($key == SDLK_UP);
+            $self->badass->yv($self->badass->yv+$mov_spd) if($key == SDLK_DOWN);
+         }
+         elsif ( $event->type == SDL_KEYUP ) {
+            my $key = $event->key_sym;
+            $self->badass->xv(0) if($key == SDLK_LEFT);
+            $self->badass->xv(0) if($key == SDLK_RIGHT);
+            $self->badass->yv(0) if($key == SDLK_UP);
+            $self->badass->yv(0) if($key == SDLK_DOWN);
+         }
       }
+      $self->badass->update_pos($ms_delta);
       $self->draw;
+      $prev_clock += $ms_delta;
    }
 }
 
@@ -117,8 +136,8 @@ sub load_entities{
    );
    $self->badass (Badass::Entity->new(
       anim => $badass_anim,
-      x=>200,
-      y=>200,
+      x=>6,
+      y=>4,
    ));
 }
 

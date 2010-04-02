@@ -13,16 +13,16 @@ for (qw/w h/){   # number of tiles
 #this is finite... a single hash would provide infinite coverage.
 has tiles => (
    is => 'ro',
-   isa => 'ArrayRef[ArrayRef]',
-   default => sub{[]} );
+   isa => 'HashRef',
+   default => sub{{}} );
 
 #dynamic programming
 sub tile_at {
    my ($self,$x,$y) = @_;
-   unless (defined $self->tiles->[$y][$x]){
+   unless (defined $self->tiles->{"$y,$x"}){
       $self->generate_tile_at($x,$y);
    }
-   return $self->tiles->[$y][$x];
+   return $self->tiles->{"$y,$x"};
 }
 
 #use Math::Fractal::NoiseMaker;
@@ -30,7 +30,7 @@ sub tile_at {
 
 sub generate_tile_at{
    my ($self, $x,$y) = @_;
-   $self->tiles->[$y][$x] = int rand(2);
+   $self->tiles->{"$y,$x"} = int rand(2);
 }
 
 
