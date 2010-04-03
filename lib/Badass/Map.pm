@@ -59,7 +59,7 @@ sub _generate_normalized_tile_proportions{
    return \@stpro;
 }
 
-my @nghbr_d = ([-1,-1],[-1,0],[-1,1],  [0,-1],[0,1],  [1,-1],[1,0],[1,1]);
+my @nghbr_d = ([-1,0, 255],[0,-1, 255],[0,1, 255],[1,0, 255], [1,1, -255],[-1,-1, -255],[-1,1, -255],[1,-1, -255],);
 my $basis = 25;
 my $neighbor_bias = 225;
 use List::Util qw/min max sum/;
@@ -82,12 +82,12 @@ sub generate_tile_at{
    }
    #now inject a bias based on neighboring tiles
    for (@nghbr_d){
-      my ($ax,$ay) = @$_;
+      my ($ax,$ay, $bias) = @$_;
       $ax += $x;
       $ay += $y;
       my $tile = $tiles->{ "$ay,$ax" };
       next unless defined $tile and defined $totals{$tile};
-      $totals{$tile} += $neighbor_bias;
+      $totals{$tile} += $bias;
    }
    my $sum = sum (map {$totals{$_}} @types);
    
