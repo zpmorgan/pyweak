@@ -13,6 +13,7 @@ for (qw/xv yv/){   #///
       is => 'rw',
       isa => 'Num',
       default => 0,
+      trigger => \&update_cycle,
    );
 }
 
@@ -26,16 +27,16 @@ sub update_pos {
    $self->y ($self->y + $self->yv*$ms);
 }
 
-my $tilesize = 32;
-
-#update anim coordinates and call anim->draw
-sub drawFOO{
+sub update_cycle{
    my $self = shift;
-   my $anim = $self->anim;
-   $anim->x(int($self->x*$tilesize));
-   $anim->y(int($self->y*$tilesize));
-   $anim->draw();
+   my $new_cycle = ($self->xv or $self->yv) ? 'walk' : 'stand';
+   if ($self->anim->current_cycle_name ne $new_cycle){
+      $self->anim->set_cycle ($new_cycle);
+   }
 }
+
+
+#animation is handled in viewport now
 
 
 

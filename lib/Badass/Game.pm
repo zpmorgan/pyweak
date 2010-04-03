@@ -136,6 +136,17 @@ sub load_entities{
          file=>'data/badass1.png',
       } ],
    );
+   $badass_anim->add_cycle(
+      name=>'walk', 
+      default=>1, 
+      frames => [ {
+         file=>'data/badass-walk1.png',
+         ms => 200,
+      },{
+         file=>'data/badass-walk2.png',
+         ms => 100,
+      } ],
+   );
    $self->badass (Badass::Entity->new(
       anim => $badass_anim,
       x=>6,

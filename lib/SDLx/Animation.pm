@@ -53,7 +53,7 @@ has _current_cycle => (
 
 sub current_cycle_name {
    my $self = shift;
-   return $self->cycles->{$self->_current_cycle}->name;
+   return $self->_current_cycle->{name};
 }
 
 =head1 NAME
