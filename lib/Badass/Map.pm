@@ -38,7 +38,7 @@ has _num_tiles_of => (
 has tile_proportions => (
    isa => 'HashRef',
    is=>'ro',
-   default => sub{{0=>4, 1=>2}},
+   default => sub{{0=>4, 1=>3}},
 );
 has _normalized_tile_proportions => (
    is => 'ro',
@@ -59,7 +59,8 @@ sub _generate_normalized_tile_proportions{
    return \@stpro;
 }
 
-my @nghbr_d = ([-1,0, 255],[0,-1, 255],[0,1, 255],[1,0, 255], [1,1, -255],[-1,-1, -255],[-1,1, -255],[1,-1, -255],);
+my @nghbr_d = ([-1,0, 255],[0,-1, 255],[0,1, 255],[1,0, 255], [1,1, -75],[-1,-1, -75],[-1,1, -75],[1,-1, -75],);
+push  @nghbr_d, ([-2,0, -55], [2,0, -115],[0,2, -115], [0,-2, -100]);
 my $basis = 25;
 my $neighbor_bias = 225;
 use List::Util qw/min max sum/;
@@ -73,13 +74,6 @@ sub generate_tile_at{
    my @types = keys %{$self->tile_proportions};
    my %totals = map {$_ => $self->_num_tiles_of->{$_}} @types;
    
-   #negate totals, then increase each one by the same amount
-   # so that the lowest (the present highest) == $basis
-   my $max_tiles = max map {$totals{$_}} keys %totals;
-   for my $type (@types){
-      $totals{$type} = -$totals{$type};
-      $totals{$type} += $max_tiles+25;
-   }
    #now inject a bias based on neighboring tiles
    for (@nghbr_d){
       my ($ax,$ay, $bias) = @$_;
@@ -87,7 +81,14 @@ sub generate_tile_at{
       $ay += $y;
       my $tile = $tiles->{ "$ay,$ax" };
       next unless defined $tile and defined $totals{$tile};
-      $totals{$tile} += $bias;
+      $totals{$tile} -= $bias;
+   }
+   #negate totals, then increase each one by the same amount
+   # so that the lowest (the present highest) == $basis
+   my $max_tiles = max map {$totals{$_}} keys %totals;
+   for my $type (@types){
+      $totals{$type} = -$totals{$type};
+      $totals{$type} += $max_tiles+25;
    }
    my $sum = sum (map {$totals{$_}} @types);
    
