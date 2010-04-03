@@ -16,6 +16,7 @@ has tiles => (
    isa => 'HashRef',
    default => sub{{}} );
 
+
 #dynamic programming
 sub tile_at {
    my ($self,$x,$y) = @_;
@@ -27,10 +28,78 @@ sub tile_at {
 
 #use Math::Fractal::NoiseMaker;
 
+#randomly generated tile registry
+has _num_tiles_of => (
+   is => 'ro',
+   isa => 'HashRef',
+   default => sub{{0=>0,1=>40}},
+);
+
+has tile_proportions => (
+   isa => 'HashRef',
+   is=>'ro',
+   default => sub{{0=>4, 1=>2}},
+);
+has _normalized_tile_proportions => (
+   is => 'ro',
+   isa => 'ArrayRef',
+   lazy => 1,
+   default => sub{$_[0]->_generate_normalized_tile_proportions},
+);
+#called automatically for former attribute
+
+sub _generate_normalized_tile_proportions{
+   my $self = shift;
+   my $tpro = $self->tile_proportions;
+   my $total = 0;
+   for (values %$tpro){
+      $total += $_;
+   }
+   my @stpro = map {[$_, $tpro->{$_}/$total]} keys %$tpro;
+   return \@stpro;
+}
+
+my @nghbr_d = ([-1,-1],[-1,0],[-1,1],  [0,-1],[0,1],  [1,-1],[1,0],[1,1]);
+my $basis = 25;
+my $neighbor_bias = 225;
+use List::Util qw/min max sum/;
 
 sub generate_tile_at{
    my ($self, $x,$y) = @_;
-   $self->tiles->{"$y,$x"} = int rand(2);
+   my $tiles = $self->tiles;
+   my $randval = rand();
+   #only randomly generate the types specified in proportions
+   #my %pros = %{$self->tile_proportions};
+   my @types = keys %{$self->tile_proportions};
+   my %totals = map {$_ => $self->_num_tiles_of->{$_}} @types;
+   
+   #negate totals, then increase each one by the same amount
+   # so that the lowest (the present highest) == $basis
+   my $max_tiles = max map {$totals{$_}} keys %totals;
+   for my $type (@types){
+      $totals{$type} = -$totals{$type};
+      $totals{$type} += $max_tiles+25;
+   }
+   #now inject a bias based on neighboring tiles
+   for (@nghbr_d){
+      my ($ax,$ay) = @$_;
+      $ax += $x;
+      $ay += $y;
+      my $tile = $tiles->{ "$ay,$ax" };
+      next unless defined $tile and defined $totals{$tile};
+      $totals{$tile} += $neighbor_bias;
+   }
+   my $sum = sum (map {$totals{$_}} @types);
+   
+   my $a = 0;
+   for my $tile_t (@types){
+      $a += $totals{$tile_t} / $sum;
+      if ($a > $randval){
+         $self->tiles->{"$y,$x"} = $tile_t;
+         $self->_num_tiles_of->{$tile_t}+= 1/$self->tile_proportions->{$tile_t};
+         return;
+      }
+   }
 }
 
 

@@ -52,8 +52,8 @@ sub track_entity{
    my $ent_y_pixels = int($self->ent->y * $tilesize);
    my $x_pixels = int($self->x * $tilesize);
    my $y_pixels = int($self->y * $tilesize);
-   if ($ent_x_pixels - 1 < $x_pixels){
-      $self->x( ($ent_x_pixels - 1) / $tilesize);
+   if ($ent_x_pixels - 100 < $x_pixels){
+      $self->x( ($ent_x_pixels - 100) / $tilesize);
    }
    elsif ($ent_x_pixels + 32 > $x_pixels + $self->w - 100){
       $self->x( ( $ent_x_pixels + 32 + 100 - $self->w) / $tilesize);
