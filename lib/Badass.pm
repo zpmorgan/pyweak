@@ -1,5 +1,6 @@
 
 use Badass::Entity;
+use Badass::Entity::Badass;
 use Badass::Game;
 use Badass::Map;
 use Badass::Viewport;

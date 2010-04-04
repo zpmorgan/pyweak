@@ -29,7 +29,7 @@ has app =>  (
 
 has badass => (
    is => 'rw',
-   isa => 'Badass::Entity');
+   isa => 'Badass::Entity::Badass');
 
 my $mov_spd = .004;
 
@@ -82,17 +82,17 @@ sub run{
          }
          elsif ( $event->type == SDL_KEYDOWN ) {
             my $key = $event->key_sym;
-            $self->badass->xv($self->badass->xv-$mov_spd) if($key == SDLK_LEFT);
-            $self->badass->xv($self->badass->xv+$mov_spd) if($key == SDLK_RIGHT);
-            $self->badass->yv($self->badass->yv-$mov_spd) if($key == SDLK_UP);
-            $self->badass->yv($self->badass->yv+$mov_spd) if($key == SDLK_DOWN);
+            $self->badass->move_left (1) if($key == SDLK_a);
+            $self->badass->move_right(1) if($key == SDLK_d);
+            $self->badass->move_up   (1) if($key == SDLK_w);
+            $self->badass->move_down (1) if($key == SDLK_s);
          }
          elsif ( $event->type == SDL_KEYUP ) {
             my $key = $event->key_sym;
-            $self->badass->xv(0) if($key == SDLK_LEFT);
-            $self->badass->xv(0) if($key == SDLK_RIGHT);
-            $self->badass->yv(0) if($key == SDLK_UP);
-            $self->badass->yv(0) if($key == SDLK_DOWN);
+            $self->badass->move_left (0) if($key == SDLK_a);
+            $self->badass->move_right(0) if($key == SDLK_d);
+            $self->badass->move_up   (0) if($key == SDLK_w);
+            $self->badass->move_down (0) if($key == SDLK_s);
          }
       }
       $self->badass->update_pos($ms_delta);
@@ -147,7 +147,7 @@ sub load_entities{
          ms => 100,
       } ],
    );
-   $self->badass (Badass::Entity->new(
+   $self->badass (Badass::Entity::Badass->new(
       anim => $badass_anim,
       x=>6,
       y=>4,
